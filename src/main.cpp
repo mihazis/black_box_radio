@@ -70,8 +70,6 @@ void setup(void) {
   timer_2 = millis();
   timer_3 = millis();
   timer_4 = millis();
-  byte bright = 0;
-  
   /*
   tft.drawLine(0, 1, 240, 1, RED); //линия
   tft.drawLine(0, 11, 240, 11, WHITE); //линия

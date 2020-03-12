@@ -9,6 +9,8 @@
 #include <Adafruit_GFX.h>
 #include <Fonts/FreeMonoBoldOblique12pt7b.h>
 #include <Fonts/FreeMonoOblique24pt7b.h>
+#include <SPI.h>
+#include "dog.h"
 
 //в определениях указываем первоначально все используемые пины
 //по принципу #define <что меняем>  <на что меняем>
@@ -60,6 +62,7 @@ void setup(void) {
   uint16_t time = millis();
   delay(1000);
   tft.fillScreen(BLACK);
+  //tft.drawRGBBitmap(0, 0, DogBitmap, 240, 240); пёс
   time = millis() - time;
   
   FastLED.addLeds<NEOPIXEL, LED_DATA>(leds, NUM_LEDS);
@@ -100,49 +103,45 @@ void setup(void) {
   tft.drawCircle(50, 50, 50, WHITE);
   tft.fillCircle(100, 100, 50, GREEN);
   */
+    }
 
-  }
+  void testdrawtext(char *text, uint16_t color) {
+      tft.setCursor(25, 120);
+      tft.setTextColor(color);
+      tft.setTextWrap(true);
+      tft.setFont(&FreeMonoOblique24pt7b);
+      tft.print(text);
+    }
+  void testdrawtext2(char *text, uint16_t color) {
+      tft.setCursor(25, 150);
+      tft.setTextColor(color);
+      tft.setTextWrap(true);
+      tft.setFont(&FreeMonoOblique24pt7b);
+      tft.print(text);
+    }
+  void textdownright(char *text, uint16_t color) {
+      tft.setCursor(120, 200);
+      tft.setTextColor(color);
+      tft.setTextWrap(true);
+      tft.setFont(&FreeMonoOblique24pt7b);
+      tft.print(text);
+    }
 
-void testdrawtext(char *text, uint16_t color) {
-  tft.setCursor(25, 120);
-  tft.setTextColor(color);
-  tft.setTextWrap(true);
-  tft.setFont(&FreeMonoOblique24pt7b);
-  tft.print(text);
-}
-void testdrawtext2(char *text, uint16_t color) {
-  tft.setCursor(25, 150);
-  tft.setTextColor(color);
-  tft.setTextWrap(true);
-  tft.setFont(&FreeMonoOblique24pt7b);
-  tft.print(text);
-}
-void textdownright(char *text, uint16_t color) {
-  tft.setCursor(120, 200);
-  tft.setTextColor(color);
-  tft.setTextWrap(true);
-  tft.setFont(&FreeMonoOblique24pt7b);
-  tft.print(text);
-}
 
 void loop() {
 
   enc1.tick(); // обязательная функция отработки. Должна постоянно опрашиваться
-  byte bright;
   
   //===============Первый таймер=============================
 
   if (millis() - timer_1 > PERIOD_1) {
     timer_1 = millis();                   // сброс таймера
     testdrawtext("ZABBIX", RED);
-    //print1 = 
-    //testdrawtext2(timer_1, RED);
-    
-  }
+    }
   if (millis() - timer_2 > PERIOD_2) {
     timer_2 = millis();
     tft.fillScreen(BLACK);
-  }
+    }
   //=========================================================
 
   
@@ -158,80 +157,16 @@ void loop() {
     fill_solid(leds, NUM_LEDS, CRGB::Black);
     FastLED.show();
     }    
-  }
-  //=========================================================
+  //==========================================================
+  tft.setCursor(1, 170);
+  tft.setTextColor(GREEN);
+  tft.setTextWrap(true);
+  tft.setFont(&FreeMonoOblique24pt7b);
   
-
-
-
-
-
-
-
-
-
-
-
-
-
-  /*
-  leds[0] = CRGB::Red;
-  leds[1] = CRGB::Orange;
-  leds[2] = CRGB::Yellow;
-  leds[3] = CRGB::Green;
-  leds[4] = CRGB::DeepSkyBlue;
-  leds[5] = CRGB::Blue;
-  leds[6] = CRGB::Violet;
-  leds[7] = CRGB::White;
-  */
-
- /*
-    if (enc1.isRight()) {
-    tft.drawRGBBitmap(0, 0, its_all, 240, 240);         // если был поворот
-    }
-    
-    if (enc1.isLeft())  tft.drawRGBBitmap(0, 0, rainbow, 240, 240);
-    if (enc1.isRightH()) testdrawtext("Right holded", WHITE); // если было удержание + поворот
-    if (enc1.isLeftH()) testdrawtext("Right holded", WHITE);
-    if (enc1.isPress()) testdrawtext("Right holded", WHITE);         // нажатие на кнопку (+ дебаунс)
-    if (enc1.isClick()) testdrawtext("Click", WHITE);         // отпускание кнопки (+ дебаунс)
-    if (enc1.isHolded()) testdrawtext("test", WHITE);       // если была удержана и энк не поворачивался
- */
-
-
-/*
- tft.init(240, 240); //инициализация экрана, задаем его размер
-
-tft.fillScreen(BLACK); //закрасить черным
-
-
-tft.setCursor(0,0); //установить курсор
-
-tft.setTextColor(GREEN); //цвет текста
-
-tft.setTextSize(0); //размер от 1 до 5
-
-tft.print("Angle:"); //вывод текста
-
-tft.println("Angle:"); //вывод текста, новый текст будет с новой строки
-
-tft.drawLine(x1, y1,x2, y2, color); //линия
-
-tft.drawRect(x1, y1 ,x2, y2, color); //прямоугольник
-
-tft.fillRect(x1, y1 ,x2, y2, color); //прямоугольник закрашенный
-
-tft.drawCircle(x, y, radius, color); //круг
-
-tft.fillCircle(x, y, radius, color); //круг заполненный
-*/
-
-/*
-  if (enc1.isPress()) {     // дипслип при нажатии энкодера
-  digitalWrite(27, LOW); // ваш код
+  
+  char* myStrings[]={"This is string 1", "This is string 2", "This is string 3", "This is string 4", "This is string 5","This is string 6"};
+  tft.print(myStrings[1]);
+  delay(1000);
   tft.fillScreen(BLACK);
-  gpio_hold_en(GPIO_NUM_27);  //это чтобы в дипслипе был выклчен амп
-  gpio_deep_sleep_hold_en(); //это чтобы в дипслипе был выклчен амп
-  esp_deep_sleep_start(); //старт дипслипа
+
   }
-  */

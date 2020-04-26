@@ -2,15 +2,18 @@
 //При использование <> в include сначала ищет в глобальных библиотеках
 //При использованиие "" в include сначала ищет в папке с текущем файлом
 #include <Arduino.h>
-#include <Arduino_ST7789.h>
 #include <GyverEncoder.h>
 #include <FastLED.h>
 #include <WiFi.h>
 #include <Adafruit_GFX.h>
-#include <Fonts/FreeMonoBoldOblique12pt7b.h>
-#include <Fonts/FreeMonoOblique24pt7b.h>
 #include <SPI.h>
 #include "dog.h"
+#include <TFT_eSPI.h> // Hardware-specific library
+#include <Fonts/FreeMonoBoldOblique12pt7b.h>
+
+#define TEXT "aA MWyz~12" // Text that will be printed on screen in any font
+#include "Free_Fonts.h"
+#define FF18    FreeMonoBoldOblique12pt7b
 
 //в определениях указываем первоначально все используемые пины
 //по принципу #define <что меняем>  <на что меняем>
@@ -18,11 +21,13 @@
 #define ENC_CLK   17
 #define ENC_DT    16
 #define ENC_SW    5
-//дисплей ST7789 240*240 SPI
-#define TFT_DC    2
-#define TFT_RST   4 
-#define TFT_MOSI  13   // for hardware SPI data pin (all of available pins)
-#define TFT_SCLK  14   // for hardware SPI sclk pin (all of available pins)
+
+//дисплей ST7789 240*240 SPI переопределил в файле User_Setup.h в библиотеке TFT_eSPI
+//#define TFT_DC    2
+//#define TFT_RST   4 
+//#define TFT_MOSI  13   // for hardware SPI data pin (all of available pins)
+//#define TFT_SCLK  14   // for hardware SPI sclk pin (all of available pins)
+
 //ИК приёмник VS1838
 #define IR_DATA   33
 #define IR_TOUCH  32
@@ -39,9 +44,16 @@
 #define PERIOD_3 600000
 #define PERIOD_4 1000
 
+#define BLACK 0x0000
+#define WHITE 0xFFFF
+
+
+
 //инициализируем оборудование
 Encoder enc1(ENC_CLK, ENC_DT, ENC_SW);
-Arduino_ST7789 tft = Arduino_ST7789(TFT_DC, TFT_RST, TFT_MOSI, TFT_SCLK); //for display without CS pin
+
+//инициализируем дисплей
+TFT_eSPI tft = TFT_eSPI();       // Invoke custom library
 
 //определяем массив led
 CRGB leds[NUM_LEDS]; 
@@ -52,81 +64,28 @@ const char *PASSWORD = "87654321"; // пароль
 
 //для таймеров
 unsigned long timer_1, timer_2, timer_3, timer_4;
-
 const float p = 3.1415926;
+uint32_t targetTime = 0;
 
+//============================================================================================================================================
 void setup(void) {
   Serial.begin(9600);
   enc1.setType(TYPE1);  // initialize encoder
-  tft.init(240, 240);   // initialize a ST7789 chip, 240x240 pixels
-  uint16_t time = millis();
-  delay(1000);
-  tft.fillScreen(BLACK);
-  //tft.drawRGBBitmap(0, 0, DogBitmap, 240, 240); пёс
-  time = millis() - time;
-  
   FastLED.addLeds<NEOPIXEL, LED_DATA>(leds, NUM_LEDS);
   FastLED.setBrightness(100);
-
   WiFi.begin(SSID, PASSWORD);
   timer_1 = millis();
   timer_2 = millis();
   timer_3 = millis();
   timer_4 = millis();
-  /*
-  tft.drawLine(0, 1, 240, 1, RED); //линия
-  tft.drawLine(0, 11, 240, 11, WHITE); //линия
-  tft.drawLine(0, 21, 240, 21, WHITE); //линия
-  tft.drawLine(0, 31, 240, 31, WHITE); //линия
-  tft.drawLine(0, 41, 240, 41, WHITE); //линия
-  tft.drawLine(0, 51, 240, 51, RED); //линия
-  tft.drawLine(0, 61, 240, 61, WHITE); //линия
-  tft.drawLine(0, 71, 240, 71, WHITE); //линия
-  tft.drawLine(0, 81, 240, 81, WHITE); //линия
-  tft.drawLine(0, 91, 240, 91, WHITE); //линия
-  tft.drawLine(0, 101, 240, 101, GREEN); //линия
-  tft.drawLine(0, 111, 240, 111, WHITE); //линия
-  tft.drawLine(0, 121, 240, 121, WHITE); //линия
-  tft.drawLine(0, 131, 240, 131, WHITE); //линия
-  tft.drawLine(0, 141, 240, 141, WHITE); //линия
-  tft.drawLine(0, 151, 240, 151, RED); //линия
-  tft.drawLine(0, 161, 240, 161, WHITE); //линия
-  tft.drawLine(0, 171, 240, 171, WHITE); //линия
-  tft.drawLine(0, 181, 240, 181, WHITE); //линия
-  tft.drawLine(0, 191, 240, 191, WHITE); //линия
-  tft.drawLine(0, 201, 240, 201, GREEN); //линия
-  tft.drawLine(0, 211, 240, 211, WHITE); //линия
-  tft.drawLine(0, 221, 240, 221, WHITE); //линия
-  tft.drawLine(0, 231, 240, 231, WHITE); //линия
-  tft.drawCircle(10, 10, 5, BLUE);
-  tft.drawCircle(30, 30, 30, WHITE);
-  tft.drawCircle(50, 50, 50, WHITE);
-  tft.fillCircle(100, 100, 50, GREEN);
-  */
-    }
 
-  void testdrawtext(char *text, uint16_t color) {
-      tft.setCursor(25, 120);
-      tft.setTextColor(color);
-      tft.setTextWrap(true);
-      tft.setFont(&FreeMonoOblique24pt7b);
-      tft.print(text);
-    }
-  void testdrawtext2(char *text, uint16_t color) {
-      tft.setCursor(25, 150);
-      tft.setTextColor(color);
-      tft.setTextWrap(true);
-      tft.setFont(&FreeMonoOblique24pt7b);
-      tft.print(text);
-    }
-  void textdownright(char *text, uint16_t color) {
-      tft.setCursor(120, 200);
-      tft.setTextColor(color);
-      tft.setTextWrap(true);
-      tft.setFont(&FreeMonoOblique24pt7b);
-      tft.print(text);
-    }
 
+  tft.begin();
+  tft.setRotation(1);
+  tft.fillScreen(TFT_BLACK);
+  targetTime = millis() + 1000;
+  }
+//==============================================================================================================================================
 
 void loop() {
 
@@ -136,11 +95,11 @@ void loop() {
 
   if (millis() - timer_1 > PERIOD_1) {
     timer_1 = millis();                   // сброс таймера
-    testdrawtext("ZABBIX", RED);
+    
     }
   if (millis() - timer_2 > PERIOD_2) {
     timer_2 = millis();
-    tft.fillScreen(BLACK);
+    
     }
   //=========================================================
 
@@ -156,17 +115,10 @@ void loop() {
     timer_4 = millis();
     fill_solid(leds, NUM_LEDS, CRGB::Black);
     FastLED.show();
-    }    
-  //==========================================================
-  tft.setCursor(1, 170);
-  tft.setTextColor(GREEN);
-  tft.setTextWrap(true);
-  tft.setFont(&FreeMonoOblique24pt7b);
-  
-  
-  char* myStrings[]={"This is string 1", "This is string 2", "This is string 3", "This is string 4", "This is string 5","This is string 6"};
-  tft.print(myStrings[1]);
-  delay(1000);
-  tft.fillScreen(BLACK);
+    }
+  selfperpetuating(2);      
+}
 
-  }
+void selfperpetuating(uint16_t renew) {
+  tft.setFreeFont(FF18);
+}

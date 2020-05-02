@@ -42,7 +42,7 @@
 #define PERIOD_1 10000    // перерыв между включением диодов (мс)
 #define PERIOD_2 100000      // время работы диодов
 #define PERIOD_3 600000
-#define PERIOD_4 1000
+#define PERIOD_4 10000
 
 #define BLACK 0x0000
 #define WHITE 0xFFFF
@@ -79,18 +79,53 @@ void setup(void) {
   timer_3 = millis();
   timer_4 = millis();
 
-
-  tft.begin();
-  tft.setRotation(1);
+  tft.init();
+  //tft.begin();
+  tft.setRotation(0);
   tft.fillScreen(TFT_BLACK);
   targetTime = millis() + 1000;
   }
 //==============================================================================================================================================
 
+void selfperpetuating(uint16_t renew) {
+  renew = 1;
+  tft.setCursor(40, 10, 4); //Первая цифра - двигает по горизонтали, вторая по вертикали
+  tft.setTextColor(TFT_GREENYELLOW, TFT_BLACK);
+  tft.println("OLKA...");
+
+  tft.setCursor(40, 40, 4);
+  tft.setTextColor(TFT_GREEN, TFT_BLACK);
+  tft.println("OLKA...");
+
+  tft.setCursor(40, 70, 4);
+  tft.setTextColor(TFT_CYAN, TFT_BLACK);
+  tft.println("OLKA...");
+
+  tft.setCursor(40, 100, 4);
+  tft.setTextColor(TFT_MAGENTA, TFT_BLACK);
+  tft.println("OLKA...");
+
+  tft.setCursor(40, 130, 4);
+  tft.setTextColor(TFT_PURPLE, TFT_BLACK);
+  tft.println("OLKA...");
+
+  tft.setCursor(40, 160, 4);
+  tft.setTextColor(TFT_ORANGE, TFT_BLACK);
+  tft.println("OLKA...");
+
+  tft.setCursor(15, 205, 4);
+  tft.setTextColor(TFT_VIOLET, TFT_BLACK);
+  tft.println("Are you Fasolka?");
+
+  renew = 1;
+}
+
 void loop() {
 
   enc1.tick(); // обязательная функция отработки. Должна постоянно опрашиваться
+  selfperpetuating(2);
   
+
   //===============Первый таймер=============================
 
   if (millis() - timer_1 > PERIOD_1) {
@@ -116,9 +151,6 @@ void loop() {
     fill_solid(leds, NUM_LEDS, CRGB::Black);
     FastLED.show();
     }
-  selfperpetuating(2);      
+    
 }
 
-void selfperpetuating(uint16_t renew) {
-  tft.setFreeFont(FF18);
-}

@@ -52,6 +52,10 @@
 #define SCREEN_AMOUNT 32
 byte screen = 1; 
 
+//==================analog_meter========================
+
+//======================================================
+
 const char *ssid = "Tensor";          // имя точки
 const char *password = "87654321";    // пароль
 
@@ -101,8 +105,8 @@ void setup(void) {
   timeClient.setTimeOffset(10800);
   }
 
-void testtext_screen(uint16_t renew) {  
-  if (renew == 1) {
+void testtext_screen(uint16_t testtext_conf) {  
+  if (testtext_conf == 1) {
     tft.setCursor(0, 0, 4); //Первая цифра - двигает по горизонтали, вторая по вертикали
     tft.setTextColor(TFT_VIOLET, TFT_BLACK);
     tft.println("ABCDEFGHIJKLMNo");
@@ -158,8 +162,8 @@ void time_layer(byte time_conf) {
   int splitT = formattedDate.indexOf("T");
   dayStamp = formattedDate.substring(0, splitT);
   timeStamp = formattedDate.substring(splitT+1, formattedDate.length()-1);
-  tft.setCursor(0, 200, 4);
-  tft.setTextColor(TFT_CYAN, TFT_BLACK);
+  tft.setCursor(120, 220, 4);
+  tft.setTextColor(TFT_WHITE, TFT_BLACK);
   tft.println(timeStamp);
   } 
 
@@ -193,9 +197,13 @@ void loop() {
 
   enc1.tick();                          // обязательная функция опроса энкодера
   first_timer();
-  time_layer(2);
-  ip_layer(1);
-  screennumber_layer(1);
+  
+  if (screen == 1) {time_layer(2);}
+  if (screen == 1) {ip_layer(1);}
+  if (screen <= 16) {screennumber_layer(1);}
+  if (screen == 32) {testtext_screen(1);}
+  //if (screen == 31) {analog_screen();}
+
 
   if (enc1.isRight()) {
     screen++;

@@ -12,8 +12,6 @@
 #include "dog.h"
 #include <TFT_eSPI.h>                  // Hardware-specific library
 #include <Fonts/FreeMonoBoldOblique12pt7b.h>
-#include "AudioOutputI2S.h"
-
 
 #define TEXT "aA MWyz~12"              // Text that will be printed on screen in any font
 #include "Free_Fonts.h"
@@ -73,8 +71,10 @@ const float p = 3.1415926;
 uint32_t targetTime = 0;
 IPAddress currentip;
 
+
 void setup(void) {
-  Serial.begin(9600);
+  Serial.begin(115200);
+  delay(1000);
   enc1.setType(TYPE2);                // тип энкодера по классификации Гайвера (полушаговый энкодер)
   FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
   FastLED.setBrightness( BRIGHTNESS );
@@ -104,6 +104,7 @@ void setup(void) {
   
   timeClient.begin();
   timeClient.setTimeOffset(10800);
+
 }
 
 void testtext_screen(uint16_t testtext_conf) {  
@@ -151,7 +152,6 @@ void testtext_screen(uint16_t testtext_conf) {
       tft.fillScreen(TFT_BLACK);
       }
 }
-
 void time_layer(byte time_conf) {      
   String formattedDate;
   String dayStamp;
@@ -167,18 +167,15 @@ void time_layer(byte time_conf) {
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
   tft.println(timeStamp);
 } 
-
 void ip_layer(byte ip_conf) {      
   tft.setCursor(10, 10, 2);
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
   tft.println(WiFi.localIP());
 } 
-
 void screennumber_layer(byte screennumber_conf) {      
   tft.setCursor(210, 10, 2);
   tft.println(screen);
 } 
-
 void first_timer() {
   if (millis() - timer_1 > PERIOD_1) {
     timer_1 = millis();
@@ -200,7 +197,6 @@ void lightning_screen32() {
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
   tft.println("White");
 }
-
 void lightning_screen31() {
   fill_solid(leds, NUM_LEDS, CRGB::Red);
   FastLED.show();
@@ -264,12 +260,6 @@ void loop() {
   if (screen == 28) {lightning_screen28();}
   if (screen == 27) {lightning_screen27();}
   if (screen == 26) {lightning_screen26();}
-
-  tft.setCursor(70, 70, 4);
-  tft.setTextColor(0x9966CC, TFT_BLACK);
-  // tft.println(touchRead(32));
-  
-  
 
   if (enc1.isRight()) {
     screen++;

@@ -12,6 +12,8 @@
 #include "dog.h"
 #include <TFT_eSPI.h>                  // Hardware-specific library
 #include <Fonts/FreeMonoBoldOblique12pt7b.h>
+#include "AudioOutputI2S.h"
+
 
 #define TEXT "aA MWyz~12"              // Text that will be printed on screen in any font
 #include "Free_Fonts.h"
@@ -38,11 +40,14 @@
 #define DAC_BCLK  26
 #define DAC_DATA  22
 //led strip 
-#define LED_DATA  23
+#define LED_PIN  23
 #define NUM_LEDS 8
+#define CHIPSET WS2812
+#define COLOR_ORDER GRB
+#define BRIGHTNESS  255
 //таймеры
-#define PERIOD_1 300000                // перерыв между включением диодов (мс)
-#define PERIOD_2 2000               // время работы диодов
+#define PERIOD_1 300000              // перерыв между включением диодов (мс)
+#define PERIOD_2 2000                // время работы диодов
 
 //цвета
 #define BLACK 0x0000
@@ -51,10 +56,6 @@
 //закольцовываем количество экранов
 #define SCREEN_AMOUNT 32
 byte screen = 1; 
-
-//==================analog_meter========================
-
-//======================================================
 
 const char *ssid = "Tensor";          // имя точки
 const char *password = "87654321";    // пароль
@@ -75,8 +76,8 @@ IPAddress currentip;
 void setup(void) {
   Serial.begin(9600);
   enc1.setType(TYPE2);                // тип энкодера по классификации Гайвера (полушаговый энкодер)
-  FastLED.addLeds<NEOPIXEL, LED_DATA>(leds, NUM_LEDS);
-  FastLED.setBrightness(100);
+  FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
+  FastLED.setBrightness( BRIGHTNESS );
   
   timer_1 = millis();
   timer_2 = millis();
@@ -103,7 +104,7 @@ void setup(void) {
   
   timeClient.begin();
   timeClient.setTimeOffset(10800);
-  }
+}
 
 void testtext_screen(uint16_t testtext_conf) {  
   if (testtext_conf == 1) {
@@ -149,7 +150,7 @@ void testtext_screen(uint16_t testtext_conf) {
     } else {
       tft.fillScreen(TFT_BLACK);
       }
-  }
+}
 
 void time_layer(byte time_conf) {      
   String formattedDate;
@@ -165,18 +166,18 @@ void time_layer(byte time_conf) {
   tft.setCursor(120, 220, 4);
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
   tft.println(timeStamp);
-  } 
+} 
 
 void ip_layer(byte ip_conf) {      
   tft.setCursor(10, 10, 2);
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
   tft.println(WiFi.localIP());
-  } 
+} 
 
 void screennumber_layer(byte screennumber_conf) {      
   tft.setCursor(210, 10, 2);
   tft.println(screen);
-  } 
+} 
 
 void first_timer() {
   if (millis() - timer_1 > PERIOD_1) {
@@ -191,19 +192,84 @@ void first_timer() {
     fill_solid(leds, NUM_LEDS, CRGB::Black);
     FastLED.show();
     }
-  }
+}
+void lightning_screen32() {
+  fill_solid(leds, NUM_LEDS, CRGB::White);
+  FastLED.show();
+  tft.setCursor(70, 70, 4);
+  tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  tft.println("White");
+}
+
+void lightning_screen31() {
+  fill_solid(leds, NUM_LEDS, CRGB::Red);
+  FastLED.show();
+  tft.setCursor(70, 70, 4);
+  tft.setTextColor(TFT_RED, TFT_BLACK);
+  tft.println("Red");
+}
+void lightning_screen30() {
+  fill_solid(leds, NUM_LEDS, CRGB::Green);
+  FastLED.show();
+  tft.setCursor(70, 70, 4);
+  tft.setTextColor(TFT_GREEN, TFT_BLACK);
+  tft.println("Green");
+}
+void lightning_screen29() {
+  fill_solid(leds, NUM_LEDS, CRGB::Blue);
+  FastLED.show();
+  tft.setCursor(70, 70, 4);
+  tft.setTextColor(TFT_BLUE, TFT_BLACK);
+  tft.println("Blue");
+}
+void lightning_screen28() {
+  fill_solid(leds, NUM_LEDS, CRGB::Peru);
+  FastLED.show();
+  tft.setCursor(70, 70, 4);
+  tft.setTextColor(0xCD853F, TFT_BLACK);
+  tft.println("Peru");
+  tft.setCursor(70, 100, 4);
+  tft.println("0xCD853F");
+}
+void lightning_screen27() {
+  fill_solid(leds, NUM_LEDS, CRGB::Indigo);
+  FastLED.show();
+  tft.setCursor(70, 70, 4);
+  tft.setTextColor(0xFFFF, TFT_BLACK);
+  tft.println("Indigo");
+  tft.setCursor(70, 100, 4);
+  tft.println("0x4B0082");
+}
+void lightning_screen26() {
+  fill_solid(leds, NUM_LEDS, CRGB::Amethyst);
+  FastLED.show();
+  tft.setCursor(70, 70, 4);
+  tft.setTextColor(0x9966CC, TFT_BLACK);
+  tft.println("Amethyst");
+  tft.setCursor(70, 100, 4);
+  tft.println("0x9966CC");
+}
 
 void loop() {
 
   enc1.tick();                          // обязательная функция опроса энкодера
   first_timer();
-  
   if (screen == 1) {time_layer(2);}
   if (screen == 1) {ip_layer(1);}
-  if (screen <= 16) {screennumber_layer(1);}
-  if (screen == 32) {testtext_screen(1);}
-  //if (screen == 31) {analog_screen();}
+  if (screen <= 32) {screennumber_layer(1);}
+  if (screen == 32) {lightning_screen32();}
+  if (screen == 31) {lightning_screen31();}
+  if (screen == 30) {lightning_screen30();}
+  if (screen == 29) {lightning_screen29();}
+  if (screen == 28) {lightning_screen28();}
+  if (screen == 27) {lightning_screen27();}
+  if (screen == 26) {lightning_screen26();}
 
+  tft.setCursor(70, 70, 4);
+  tft.setTextColor(0x9966CC, TFT_BLACK);
+  // tft.println(touchRead(32));
+  
+  
 
   if (enc1.isRight()) {
     screen++;
@@ -220,6 +286,8 @@ void loop() {
   if (enc1.isPress()) {
     screen = 1;
     tft.fillScreen(TFT_BLACK);
-  }
+    fill_solid(leds, NUM_LEDS, CRGB::Black);
+    FastLED.show();
+    }
 }
 
